@@ -31,7 +31,7 @@ public class ExtendedFeaturesetTest {
 	@Test
 	public void testDashIsDisabledByDefault() throws Exception {
 
-		SailRepository shaclRepository = Utils.getInitializedShaclRepository("test-cases/class/allSubjects/shacl.ttl"
+		SailRepository shaclRepository = Utils.getInitializedShaclRepository("test-cases/class/allSubjects/shacl.trig"
 		);
 
 		try (SailRepositoryConnection connection = shaclRepository.getConnection()) {
@@ -39,13 +39,14 @@ public class ExtendedFeaturesetTest {
 			connection.add(vf.createBNode(), ex_knows, vf.createBNode());
 			connection.commit();
 		}
+		shaclRepository.shutDown();
 
 	}
 
 	@Test
 	public void testThatDashCanBeEnabled() throws Throwable {
 
-		SailRepository shaclRepository = Utils.getInitializedShaclRepository("test-cases/class/allSubjects/shacl.ttl"
+		SailRepository shaclRepository = Utils.getInitializedShaclRepository("test-cases/class/allSubjects/shacl.trig"
 		);
 		((ShaclSail) shaclRepository.getSail()).setDashDataShapes(true);
 
@@ -61,6 +62,7 @@ public class ExtendedFeaturesetTest {
 				}
 			});
 		}
+		shaclRepository.shutDown();
 
 	}
 
@@ -68,7 +70,7 @@ public class ExtendedFeaturesetTest {
 	public void testTargetShapeIsDisabledByDefault() throws Exception {
 
 		SailRepository shaclRepository = Utils
-				.getInitializedShaclRepository("test-cases/class/simpleTargetShape/shacl.ttl");
+				.getInitializedShaclRepository("test-cases/class/simpleTargetShape/shacl.trig");
 
 		try (SailRepositoryConnection connection = shaclRepository.getConnection()) {
 			connection.begin();
@@ -78,13 +80,15 @@ public class ExtendedFeaturesetTest {
 			connection.commit();
 		}
 
+		shaclRepository.shutDown();
+
 	}
 
 	@Test
 	public void testThatTargetShapesCanBeEnabled() throws Throwable {
 
 		SailRepository shaclRepository = Utils
-				.getInitializedShaclRepository("test-cases/class/simpleTargetShape/shacl.ttl");
+				.getInitializedShaclRepository("test-cases/class/simpleTargetShape/shacl.trig");
 
 		((ShaclSail) shaclRepository.getSail()).setDashDataShapes(true);
 		((ShaclSail) shaclRepository.getSail()).setEclipseRdf4jShaclExtensions(true);
@@ -103,6 +107,7 @@ public class ExtendedFeaturesetTest {
 				}
 			});
 		}
+		shaclRepository.shutDown();
 
 	}
 
