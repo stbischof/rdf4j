@@ -119,7 +119,8 @@ public class DashHasValueInConstraintComponent extends AbstractConstraintCompone
 							connectionsGroup.getRdfsSubClassOfReasoner(), stableRandomVariableProvider),
 					false,
 					null,
-					(b) -> new ValidationTuple(b.getValue("a"), b.getValue("c"), scope, true)
+					(b) -> new ValidationTuple(b.getValue("a"), b.getValue("c"), scope, true,
+							validationSettings.getDataGraph())
 			);
 
 			PlanNode invalidTargets = new GroupByFilter(joined, group -> {
@@ -195,7 +196,7 @@ public class DashHasValueInConstraintComponent extends AbstractConstraintCompone
 											stableRandomVariableProvider);
 						}
 						if (value.isLiteral()) {
-							return "BIND(" + value.toString() + " as ?" + object.getName() + ")\n"
+							return "BIND(" + value + " as ?" + object.getName() + ")\n"
 									+ path.getTargetQueryFragment(subject, object, rdfsSubClassOfReasoner,
 											stableRandomVariableProvider);
 						}

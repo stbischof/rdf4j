@@ -19,7 +19,8 @@ public class ValidationSettings {
 	private final boolean validateEntireBaseSail;
 	private final boolean performanceLogging;
 
-	public ValidationSettings(Resource[] dataGraph, boolean logValidationPlans, boolean validateEntireBaseSail,
+	public ValidationSettings(Resource[] dataGraph, boolean logValidationPlans,
+			boolean validateEntireBaseSail,
 			boolean performanceLogging) {
 
 		this.dataGraph = dataGraph;
@@ -50,4 +51,5 @@ public class ValidationSettings {
 	public boolean isPerformanceLogging() {
 		return performanceLogging;
 	}
+
 }

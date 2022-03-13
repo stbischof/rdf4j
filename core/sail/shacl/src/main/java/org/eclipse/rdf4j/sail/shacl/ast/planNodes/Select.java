@@ -13,15 +13,13 @@ import java.util.function.Function;
 
 import org.apache.commons.text.StringEscapeUtils;
 import org.eclipse.rdf4j.common.iteration.CloseableIteration;
-import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Resource;
-import org.eclipse.rdf4j.model.vocabulary.RDF4J;
 import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.Dataset;
 import org.eclipse.rdf4j.query.MalformedQueryException;
 import org.eclipse.rdf4j.query.QueryEvaluationException;
 import org.eclipse.rdf4j.query.QueryLanguage;
 import org.eclipse.rdf4j.query.impl.MapBindingSet;
-import org.eclipse.rdf4j.query.impl.SimpleDataset;
 import org.eclipse.rdf4j.query.parser.ParsedQuery;
 import org.eclipse.rdf4j.query.parser.QueryParserFactory;
 import org.eclipse.rdf4j.query.parser.QueryParserRegistry;
@@ -43,7 +41,7 @@ public class Select implements PlanNode {
 
 	private final String query;
 	private final boolean sorted;
-	private final SimpleDataset dataset;
+	private final Dataset dataset;
 	private StackTraceElement[] stackTrace;
 	private boolean printed = false;
 	private ValidationExecutionLogger validationExecutionLogger;
@@ -63,13 +61,7 @@ public class Select implements PlanNode {
 		sorted = orderBy != null;
 
 		this.query = "select * where {\n" + query + "\n} " + (orderBy != null ? "order by " + orderBy : "");
-		dataset = new SimpleDataset();
-		for (Resource resource : dataGraph) {
-			if (resource == null)
-				dataset.addDefaultGraph(RDF4J.NIL);
-			else
-				dataset.addDefaultGraph(((IRI) resource));
-		}
+		dataset = PlanNodeHelper.asDefaultGraphDataset(dataGraph);
 
 	}
 

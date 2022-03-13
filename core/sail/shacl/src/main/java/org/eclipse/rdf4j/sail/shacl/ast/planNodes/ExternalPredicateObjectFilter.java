@@ -34,9 +34,10 @@ public class ExternalPredicateObjectFilter implements PlanNode {
 	private final boolean returnMatching;
 	private boolean printed = false;
 	private ValidationExecutionLogger validationExecutionLogger;
-	private Resource[] dataGraph;
+	private final Resource[] dataGraph;
 
-	public ExternalPredicateObjectFilter(SailConnection connection, Resource[] dataGraph, IRI filterOnPredicate,
+	public ExternalPredicateObjectFilter(SailConnection connection, Resource[] dataGraph,
+			IRI filterOnPredicate,
 			Set<Resource> filterOnObject,
 			PlanNode parent,
 			boolean returnMatching, FilterOn filterOn) {

@@ -135,7 +135,8 @@ public abstract class SimpleAbstractConstraintComponent extends AbstractConstrai
 											new StatementMatcher.Variable("c"),
 											connectionsGroup.getRdfsSubClassOfReasoner(), stableRandomVariableProvider),
 							false, null,
-							(b) -> new ValidationTuple(b.getValue("a"), b.getValue("c"), scope, true));
+							(b) -> new ValidationTuple(b.getValue("a"), b.getValue("c"), scope, true,
+									validationSettings.getDataGraph()));
 				}
 			}
 
@@ -184,7 +185,8 @@ public abstract class SimpleAbstractConstraintComponent extends AbstractConstrai
 									connectionsGroup.getRdfsSubClassOfReasoner(), stableRandomVariableProvider),
 					true,
 					connectionsGroup.getPreviousStateConnection(),
-					b -> new ValidationTuple(b.getValue("a"), b.getValue("c"), scope, true));
+					b -> new ValidationTuple(b.getValue("a"), b.getValue("c"), scope, true,
+							validationSettings.getDataGraph()));
 
 			top = UnionNode.getInstance(top, bulkedExternalInnerJoin);
 

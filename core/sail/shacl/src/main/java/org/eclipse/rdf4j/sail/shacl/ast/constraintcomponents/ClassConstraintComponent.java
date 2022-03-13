@@ -126,7 +126,8 @@ public class ClassConstraintComponent extends AbstractConstraintComponent {
 							connectionsGroup.getRdfsSubClassOfReasoner(), stableRandomVariableProvider),
 					false,
 					null,
-					(b) -> new ValidationTuple(b.getValue("a"), b.getValue("c"), scope, true)
+					(b) -> new ValidationTuple(b.getValue("a"), b.getValue("c"), scope, true,
+							validationSettings.getDataGraph())
 			);
 
 			// filter by type against the base sail
@@ -256,8 +257,8 @@ public class ClassConstraintComponent extends AbstractConstraintComponent {
 	@Override
 	public boolean requiresEvaluation(ConnectionsGroup connectionsGroup, Scope scope, Resource[] dataGraph) {
 		return super.requiresEvaluation(connectionsGroup, scope, dataGraph)
-				|| connectionsGroup.getRemovedStatements().hasStatement(null, RDF.TYPE, clazz, true)
-				|| connectionsGroup.getAddedStatements().hasStatement(null, RDF.TYPE, clazz, true);
+				|| connectionsGroup.getRemovedStatements().hasStatement(null, RDF.TYPE, clazz, true, dataGraph)
+				|| connectionsGroup.getAddedStatements().hasStatement(null, RDF.TYPE, clazz, true, dataGraph);
 	}
 
 	@Override

@@ -101,7 +101,8 @@ public class EffectiveTarget {
 
 		if (varNames.size() == 1) {
 
-			PlanNode parent = new TupleMapper(source, new ActiveTargetTupleMapper(scope, includePropertyShapeValues));
+			PlanNode parent = new TupleMapper(source,
+					new ActiveTargetTupleMapper(scope, includePropertyShapeValues, dataGraph));
 
 			if (filter != null) {
 				parent = filter.apply(parent);
@@ -146,19 +147,15 @@ public class EffectiveTarget {
 
 		return Stream.concat(chain.stream(), getOptionalAsStream())
 				.flatMap(EffectiveTargetObject::getStatementMatcher)
-				.anyMatch(currentStatementPattern ->
-
-				connectionsGroup.getAddedStatements()
-						.hasStatement(
-								currentStatementPattern.getSubjectValue(),
-								currentStatementPattern.getPredicateValue(),
-								currentStatementPattern.getObjectValue(), false, dataGraph)
-						||
-						connectionsGroup.getRemovedStatements()
-								.hasStatement(
-										currentStatementPattern.getSubjectValue(),
+				.anyMatch(
+						currentStatementPattern -> connectionsGroup.getAddedStatements()
+								.hasStatement(currentStatementPattern.getSubjectValue(),
 										currentStatementPattern.getPredicateValue(),
 										currentStatementPattern.getObjectValue(), false, dataGraph)
+								|| connectionsGroup.getRemovedStatements()
+										.hasStatement(currentStatementPattern.getSubjectValue(),
+												currentStatementPattern.getPredicateValue(),
+												currentStatementPattern.getObjectValue(), false, dataGraph)
 
 				);
 
@@ -258,7 +255,8 @@ public class EffectiveTarget {
 
 	}
 
-	public PlanNode getTargetFilter(ConnectionsGroup connectionsGroup, Resource[] dataGraph, PlanNode parent) {
+	public PlanNode getTargetFilter(ConnectionsGroup connectionsGroup, Resource[] dataGraph,
+			PlanNode parent) {
 
 		EffectiveTargetObject last = chain.getLast();
 
@@ -350,17 +348,20 @@ public class EffectiveTarget {
 	}
 
 	static class ActiveTargetTupleMapper implements Function<ValidationTuple, ValidationTuple> {
-		ConstraintComponent.Scope scope;
-		boolean includePropertyShapeValues;
+		private final ConstraintComponent.Scope scope;
+		private final boolean includePropertyShapeValues;
+		private final Resource[] contexts;
 
-		public ActiveTargetTupleMapper(ConstraintComponent.Scope scope, boolean includePropertyShapeValues) {
+		public ActiveTargetTupleMapper(ConstraintComponent.Scope scope, boolean includePropertyShapeValues,
+				Resource[] contexts) {
 			this.scope = scope;
 			this.includePropertyShapeValues = includePropertyShapeValues;
+			this.contexts = contexts;
 		}
 
 		@Override
 		public ValidationTuple apply(ValidationTuple validationTuple) {
-			return new ValidationTuple(validationTuple.getActiveTarget(), scope, includePropertyShapeValues);
+			return new ValidationTuple(validationTuple.getActiveTarget(), scope, includePropertyShapeValues, contexts);
 		}
 
 		@Override

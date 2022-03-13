@@ -55,8 +55,9 @@ public class Unique implements PlanNode {
 	}
 
 	public static PlanNode getInstance(PlanNode parent, boolean compress) {
-		if (parent == EmptyNode.getInstance())
+		if (parent == EmptyNode.getInstance()) {
 			return parent;
+		}
 		return new Unique(parent, compress);
 	}
 

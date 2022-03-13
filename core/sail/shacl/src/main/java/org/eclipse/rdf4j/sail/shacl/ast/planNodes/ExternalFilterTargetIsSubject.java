@@ -22,7 +22,7 @@ import org.eclipse.rdf4j.sail.memory.MemoryStoreConnection;
 public class ExternalFilterTargetIsSubject extends FilterPlanNode {
 
 	private final SailConnection connection;
-	private Resource[] dataGraph;
+	private final Resource[] dataGraph;
 
 	public ExternalFilterTargetIsSubject(SailConnection connection, Resource[] dataGraph, PlanNode parent) {
 		super(parent);

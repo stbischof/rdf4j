@@ -39,6 +39,11 @@ public class RepositoryConnectionShapeSource implements ShapeSource {
 		return new RepositoryConnectionShapeSource(connection, context);
 	}
 
+	@Override
+	public Resource[] getActiveContexts() {
+		return context;
+	}
+
 	public Stream<ShapesGraph> getAllShapeContexts() {
 		assert context == null;
 		try (Stream<? extends Statement> stream = connection.getStatements(null, SHACL.SHAPES_GRAPH, null, false)
@@ -99,7 +104,7 @@ public class RepositoryConnectionShapeSource implements ShapeSource {
 
 	public Stream<Statement> getAllStatements(Resource id) {
 		assert context != null;
-		return connection.getStatements(id, null, null, true, context).stream().map(s -> ((Statement) s));
+		return connection.getStatements(id, null, null, true, context).stream();
 	}
 
 	public Value getRdfFirst(Resource subject) {

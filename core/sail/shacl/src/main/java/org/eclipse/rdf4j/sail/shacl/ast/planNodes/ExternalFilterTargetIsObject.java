@@ -32,11 +32,8 @@ public class ExternalFilterTargetIsObject extends FilterPlanNode {
 
 	@Override
 	boolean checkTuple(ValidationTuple t) {
-
 		Value target = t.getActiveTarget();
-
 		return connection.hasStatement(null, null, target, true, dataGraph);
-
 	}
 
 	@Override

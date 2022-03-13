@@ -29,10 +29,12 @@ import org.eclipse.rdf4j.sail.shacl.wrapper.data.RdfsSubClassOfReasoner;
 
 public class TargetNode extends Target {
 	private final TreeSet<Value> targetNodes;
+	private final Resource[] sourceContexts;
 
-	public TargetNode(TreeSet<Value> targetNodes) {
+	public TargetNode(TreeSet<Value> targetNodes, Resource[] sourceContexts) {
 		this.targetNodes = targetNodes;
 		assert !this.targetNodes.isEmpty();
+		this.sourceContexts = sourceContexts;
 
 	}
 
@@ -42,8 +44,9 @@ public class TargetNode extends Target {
 	}
 
 	@Override
-	public PlanNode getAdded(ConnectionsGroup connectionsGroup, Resource[] dataGraph, ConstraintComponent.Scope scope) {
-		return new ValuesBackedNode(targetNodes, scope);
+	public PlanNode getAdded(ConnectionsGroup connectionsGroup, Resource[] dataGraph,
+			ConstraintComponent.Scope scope) {
+		return new ValuesBackedNode(targetNodes, scope, sourceContexts);
 	}
 
 	@Override
@@ -80,7 +83,8 @@ public class TargetNode extends Target {
 	}
 
 	@Override
-	public PlanNode getTargetFilter(ConnectionsGroup connectionsGroup, Resource[] dataGraph, PlanNode parent) {
+	public PlanNode getTargetFilter(ConnectionsGroup connectionsGroup, Resource[] dataGraph,
+			PlanNode parent) {
 		return new SetFilterNode(targetNodes, parent, 0, true);
 	}
 

@@ -8,6 +8,7 @@
 package org.eclipse.rdf4j.sail.shacl.ast.planNodes;
 
 import java.util.ArrayDeque;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
@@ -45,7 +46,7 @@ public class AllTargetsPlanNode implements PlanNode {
 		List<String> varNames = vars.stream().map(StatementMatcher.Variable::getName).collect(Collectors.toList());
 
 		this.select = new Select(connectionsGroup.getBaseConnection(), query, null,
-				new AllTargetsBindingSetMapper(varNames, scope, false), dataGraph);
+				new AllTargetsBindingSetMapper(varNames, scope, false, dataGraph), dataGraph);
 
 	}
 
@@ -135,19 +136,22 @@ public class AllTargetsPlanNode implements PlanNode {
 	}
 
 	static class AllTargetsBindingSetMapper implements Function<BindingSet, ValidationTuple> {
-		List<String> varNames;
-		ConstraintComponent.Scope scope;
-		boolean hasValue;
+		private final List<String> varNames;
+		private final ConstraintComponent.Scope scope;
+		private final boolean hasValue;
+		private final Resource[] contexts;
 
-		public AllTargetsBindingSetMapper(List<String> varNames, ConstraintComponent.Scope scope, boolean hasValue) {
+		public AllTargetsBindingSetMapper(List<String> varNames, ConstraintComponent.Scope scope, boolean hasValue,
+				Resource[] contexts) {
 			this.varNames = varNames;
 			this.scope = scope;
 			this.hasValue = hasValue;
+			this.contexts = contexts;
 		}
 
 		@Override
 		public ValidationTuple apply(BindingSet b) {
-			return new ValidationTuple(b, varNames, scope, false);
+			return new ValidationTuple(b, varNames, scope, false, contexts);
 		}
 
 		@Override
@@ -159,14 +163,15 @@ public class AllTargetsPlanNode implements PlanNode {
 				return false;
 			}
 			AllTargetsBindingSetMapper that = (AllTargetsBindingSetMapper) o;
-			return hasValue == that.hasValue &&
-					varNames.equals(that.varNames) &&
-					scope == that.scope;
+			return hasValue == that.hasValue && varNames.equals(that.varNames) && scope == that.scope
+					&& Arrays.equals(contexts, that.contexts);
 		}
 
 		@Override
 		public int hashCode() {
-			return Objects.hash(varNames, scope, hasValue, AllTargetsBindingSetMapper.class);
+			int result = Objects.hash(varNames, scope, hasValue);
+			result = 31 * result + Arrays.hashCode(contexts);
+			return result;
 		}
 	}
 

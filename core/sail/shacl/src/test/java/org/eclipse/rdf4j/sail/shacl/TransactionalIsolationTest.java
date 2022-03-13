@@ -18,9 +18,11 @@ import java.util.List;
 
 import org.eclipse.rdf4j.common.iteration.Iterations;
 import org.eclipse.rdf4j.common.transaction.IsolationLevels;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.util.Values;
 import org.eclipse.rdf4j.model.vocabulary.RDF4J;
 import org.eclipse.rdf4j.query.Update;
 import org.eclipse.rdf4j.repository.RepositoryException;
@@ -828,13 +830,13 @@ public class TransactionalIsolationTest {
 		}
 	}
 
-	@Disabled // we don't support updating shapes through SPARQL at the moment
 	@Test
 	public void testUpdateShapesSparql() throws Throwable {
 		ShaclSail shaclSail = new ShaclSail(new MemoryStore());
 
 		SailRepository sailRepository = new SailRepository(shaclSail);
-		sailRepository.init();
+
+		IRI g1 = Values.iri("http://example.com/g1");
 
 		try (SailRepositoryConnection connection = sailRepository.getConnection()) {
 
@@ -854,7 +856,7 @@ public class TransactionalIsolationTest {
 					"                sh:minCount 1 ;",
 					"        ] ."));
 
-			connection.add(shaclRules, "", RDFFormat.TRIG, RDF4J.SHACL_SHAPE_GRAPH);
+			connection.add(shaclRules, "", RDFFormat.TURTLE, g1);
 			connection.commit();
 
 			connection.begin();

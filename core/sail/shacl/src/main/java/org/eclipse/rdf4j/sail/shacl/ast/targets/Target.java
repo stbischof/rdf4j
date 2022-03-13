@@ -29,6 +29,7 @@ public abstract class Target implements Exportable, Targetable {
 			RdfsSubClassOfReasoner rdfsSubClassOfReasoner,
 			StatementMatcher.StableRandomVariableProvider stableRandomVariableProvider);
 
-	public abstract PlanNode getTargetFilter(ConnectionsGroup connectionsGroup, Resource[] dataGraph, PlanNode parent);
+	public abstract PlanNode getTargetFilter(ConnectionsGroup connectionsGroup, Resource[] dataGraph,
+			PlanNode parent);
 
 }

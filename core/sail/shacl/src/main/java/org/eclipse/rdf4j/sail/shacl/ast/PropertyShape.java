@@ -203,7 +203,7 @@ public class PropertyShape extends Shape implements ConstraintComponent, Identif
 
 		for (ConstraintComponent constraintComponent : constraintComponents) {
 			if (!getPath().isSupported()) {
-				logger.error("Unsupported path detected. Shape ignored! \n" + this.toString());
+				logger.error("Unsupported path detected. Shape ignored! \n" + this);
 				continue;
 			}
 
@@ -214,7 +214,8 @@ public class PropertyShape extends Shape implements ConstraintComponent, Identif
 			if (!(constraintComponent instanceof PropertyShape)) {
 				validationPlanNode = new ValidationReportNode(validationPlanNode, t -> {
 					return new ValidationResult(t.getActiveTarget(), t.getValue(), this,
-							constraintComponent.getConstraintComponent(), getSeverity(), t.getScope());
+							constraintComponent.getConstraintComponent(), getSeverity(), t.getScope(), t.getContexts(),
+							getContexts());
 				});
 			}
 

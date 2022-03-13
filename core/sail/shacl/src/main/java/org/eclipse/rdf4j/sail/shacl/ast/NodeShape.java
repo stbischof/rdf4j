@@ -171,7 +171,8 @@ public class NodeShape extends Shape implements ConstraintComponent, Identifiabl
 			if (!(constraintComponent instanceof PropertyShape) && produceValidationReports) {
 				validationPlanNode = new ValidationReportNode(validationPlanNode, t -> {
 					return new ValidationResult(t.getActiveTarget(), t.getActiveTarget(), this,
-							constraintComponent.getConstraintComponent(), getSeverity(), t.getScope());
+							constraintComponent.getConstraintComponent(), getSeverity(), t.getScope(), t.getContexts(),
+							getContexts());
 				});
 			}
 

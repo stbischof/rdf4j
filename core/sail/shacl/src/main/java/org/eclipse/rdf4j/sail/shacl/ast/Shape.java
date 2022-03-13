@@ -96,6 +96,8 @@ abstract public class Shape implements ConstraintComponent, Identifiable, Export
 
 	List<ConstraintComponent> constraintComponents = new ArrayList<>();
 
+	Resource[] contexts;
+
 	public Shape() {
 	}
 
@@ -105,6 +107,7 @@ abstract public class Shape implements ConstraintComponent, Identifiable, Export
 		this.severity = shape.severity;
 		this.id = shape.id;
 		this.targetChain = shape.targetChain;
+		this.contexts = shape.contexts;
 	}
 
 	public void populate(ShaclProperties properties, ShapeSource shapeSource,
@@ -112,12 +115,13 @@ abstract public class Shape implements ConstraintComponent, Identifiable, Export
 		this.deactivated = properties.isDeactivated();
 		this.message = properties.getMessage();
 		this.id = properties.getId();
+		this.contexts = shapeSource.getActiveContexts();
 
 		if (!properties.getTargetClass().isEmpty()) {
 			target.add(new TargetClass(properties.getTargetClass()));
 		}
 		if (!properties.getTargetNode().isEmpty()) {
-			target.add(new TargetNode(properties.getTargetNode()));
+			target.add(new TargetNode(properties.getTargetNode(), shapeSource.getActiveContexts()));
 		}
 		if (!properties.getTargetObjectsOf().isEmpty()) {
 			target.add(new TargetObjectsOf(properties.getTargetObjectsOf()));
@@ -160,6 +164,10 @@ abstract public class Shape implements ConstraintComponent, Identifiable, Export
 	@Override
 	public Resource getId() {
 		return id;
+	}
+
+	public Resource[] getContexts() {
+		return contexts;
 	}
 
 	protected abstract Shape shallowClone();
@@ -374,7 +382,8 @@ abstract public class Shape implements ConstraintComponent, Identifiable, Export
 				logger.debug("Use validation approach {} for shape {}", validationApproach, this);
 				return Shape.this.generateSparqlValidationQuery(connectionsGroup, validationSettings, false, false,
 						Scope.none)
-						.getValidationPlan(connectionsGroup.getBaseConnection(), validationSettings.getDataGraph());
+						.getValidationPlan(connectionsGroup.getBaseConnection(), validationSettings.getDataGraph(),
+								getContexts());
 			} else {
 				logger.debug("Use fall back validation approach for bulk validation instead of SPARQL for shape {}",
 						this);

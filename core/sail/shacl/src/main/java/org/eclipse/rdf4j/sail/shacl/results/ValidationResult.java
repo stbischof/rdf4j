@@ -11,17 +11,22 @@ package org.eclipse.rdf4j.sail.shacl.results;
 import static org.eclipse.rdf4j.model.util.Values.bnode;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
+import org.eclipse.rdf4j.model.vocabulary.RDF4J;
+import org.eclipse.rdf4j.model.vocabulary.RSX;
 import org.eclipse.rdf4j.model.vocabulary.SHACL;
 import org.eclipse.rdf4j.sail.shacl.SourceConstraintComponent;
 import org.eclipse.rdf4j.sail.shacl.ast.PropertyShape;
@@ -46,11 +51,14 @@ public class ValidationResult {
 	private final SourceConstraintComponent sourceConstraintComponent;
 	private final Severity severity;
 	private final Value focusNode;
+	private final Resource[] dataGraphs;
+	private final Resource[] shapesGraphs;
 	private Path path;
 	private ValidationResult detail;
 
 	public ValidationResult(Value focusNode, Value value, Shape shape,
-			SourceConstraintComponent sourceConstraintComponent, Severity severity, ConstraintComponent.Scope scope) {
+			SourceConstraintComponent sourceConstraintComponent, Severity severity, ConstraintComponent.Scope scope,
+			Resource[] dataGraphs, Resource[] shapesGraphs) {
 		this.focusNode = focusNode;
 		assert this.focusNode != null;
 		this.sourceConstraintComponent = sourceConstraintComponent;
@@ -68,6 +76,8 @@ public class ValidationResult {
 			this.path = ((PropertyShape) shape).getPath();
 		}
 		this.severity = severity;
+		this.dataGraphs = dataGraphs;
+		this.shapesGraphs = shapesGraphs;
 	}
 
 	/**
@@ -108,6 +118,14 @@ public class ValidationResult {
 
 		model.add(getId(), SHACL.FOCUS_NODE, focusNode);
 
+		for (Resource graph : contextsToSet(dataGraphs)) {
+			model.add(getId(), RSX.dataGraph, graph);
+		}
+
+		for (Resource graph : contextsToSet(shapesGraphs)) {
+			model.add(getId(), RSX.shapesGraph, graph);
+		}
+
 		value.ifPresent(v -> model.add(getId(), SHACL.VALUE, v));
 
 		if (this.path != null) {
@@ -127,6 +145,16 @@ public class ValidationResult {
 		shape.toModel(getId(), SHACL.SOURCE_SHAPE, model, new HashSet<>());
 
 		return model;
+	}
+
+	private static Set<Resource> contextsToSet(Resource[] context) {
+		if (context == null || context.length == 0) {
+			return Collections.emptySet();
+		}
+
+		return Arrays.stream(context)
+				.map(c -> c == null ? RDF4J.NIL : c)
+				.collect(Collectors.toSet());
 	}
 
 	/**

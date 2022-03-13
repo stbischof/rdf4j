@@ -24,9 +24,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.eclipse.rdf4j.common.transaction.IsolationLevels;
 import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.model.Model;
-import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.impl.DynamicModel;
@@ -35,6 +35,7 @@ import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.RDF4J;
 import org.eclipse.rdf4j.model.vocabulary.SHACL;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.RepositoryException;
 import org.eclipse.rdf4j.repository.sail.SailRepository;
 import org.eclipse.rdf4j.repository.sail.SailRepositoryConnection;
@@ -76,8 +77,6 @@ public class W3cComplianceTest {
 	}
 
 	private void runParsingTest(URL resourceName) throws IOException, InterruptedException {
-		W3C_shaclTestValidate expected = new W3C_shaclTestValidate(resourceName);
-
 		ShaclSail shaclSail = new ShaclSail(new MemoryStore());
 		SailRepository sailRepository = new SailRepository(shaclSail);
 
@@ -101,7 +100,6 @@ public class W3cComplianceTest {
 	private Model extractShapesModel(ShaclSail shaclSail) throws InterruptedException {
 		List<ContextWithShapes> shapes = shaclSail.getCachedShapes().getDataAndRelease();
 
-		HashSet<Resource> dedupe = new HashSet<>();
 		DynamicModel model = new DynamicModelFactory().createEmptyModel();
 
 		shapes.forEach(shape -> shape.toModel(model));
@@ -177,11 +175,11 @@ public class W3cComplianceTest {
 		shaclSail.setParallelValidation(false);
 		SailRepository sailRepository = new SailRepository(shaclSail);
 
-		Utils.loadShapeData(sailRepository, resourceName);
+		Utils.loadShapeData(sailRepository, resourceName, RDFFormat.TURTLE, RDF4J.SHACL_SHAPE_GRAPH);
 
 		Model statements = extractShapesModel(shaclSail);
 
-		System.out.println(AbstractShaclTest.modelToString(statements));
+		System.out.println(AbstractShaclTest.modelToString(statements, RDFFormat.TURTLE));
 
 		boolean actualConforms = true;
 		try (SailRepositoryConnection connection = sailRepository.getConnection()) {

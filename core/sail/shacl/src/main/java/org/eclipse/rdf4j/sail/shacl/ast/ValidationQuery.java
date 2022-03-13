@@ -87,10 +87,12 @@ public class ValidationQuery {
 	}
 
 	public static ValidationQuery union(ValidationQuery a, ValidationQuery b) {
-		if (a == Deactivated.instance)
+		if (a == Deactivated.instance) {
 			return b;
-		if (b == Deactivated.instance)
+		}
+		if (b == Deactivated.instance) {
 			return a;
+		}
 
 		assert a.getTargetVariable(false).equals(b.getTargetVariable(false));
 		assert a.getValueVariable(false).equals(b.getValueVariable(false));
@@ -115,7 +117,8 @@ public class ValidationQuery {
 		this.query = query;
 	}
 
-	public PlanNode getValidationPlan(SailConnection baseConnection, Resource[] dataGraph) {
+	public PlanNode getValidationPlan(SailConnection baseConnection, Resource[] dataGraph,
+			Resource[] shapesGraphs) {
 
 		assert query != null;
 
@@ -136,22 +139,22 @@ public class ValidationQuery {
 				if (propertyShapeWithValue_validationReport) {
 					return new ValidationTuple(bindings.getValue(getTargetVariable(true)),
 							bindings.getValue(getValueVariable(true)),
-							scope_validationReport, true);
+							scope_validationReport, true, dataGraph);
 				} else {
 					return new ValidationTuple(bindings.getValue(getTargetVariable(true)),
-							scope_validationReport, false);
+							scope_validationReport, false, dataGraph);
 				}
 
 			} else {
 				return new ValidationTuple(bindings.getValue(getTargetVariable(true)),
-						scope_validationReport, true);
+						scope_validationReport, true, dataGraph);
 			}
 
 		}, dataGraph);
 
 		return new ValidationReportNode(select, t -> {
 			return new ValidationResult(t.getActiveTarget(), t.getValue(), shape,
-					constraintComponent_validationReport, severity, t.getScope());
+					constraintComponent_validationReport, severity, t.getScope(), t.getContexts(), shapesGraphs);
 		});
 
 	}
@@ -231,7 +234,8 @@ public class ValidationQuery {
 		}
 
 		@Override
-		public PlanNode getValidationPlan(SailConnection baseConnection, Resource[] dataGraph) {
+		public PlanNode getValidationPlan(SailConnection baseConnection, Resource[] dataGraph,
+				Resource[] shapesGraphs) {
 			return EmptyNode.getInstance();
 		}
 

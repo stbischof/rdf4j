@@ -96,7 +96,8 @@ public class MinCountConstraintComponent extends AbstractConstraintComponent {
 								connectionsGroup.getRdfsSubClassOfReasoner(), stableRandomVariableProvider),
 				false,
 				null,
-				(b) -> new ValidationTuple(b.getValue("a"), b.getValue("c"), scope, true)
+				(b) -> new ValidationTuple(b.getValue("a"), b.getValue("c"), scope, true,
+						validationSettings.getDataGraph())
 		);
 
 		PlanNode groupByCount = new GroupByCountFilter(relevantTargetsWithPath, count -> count < minCount);

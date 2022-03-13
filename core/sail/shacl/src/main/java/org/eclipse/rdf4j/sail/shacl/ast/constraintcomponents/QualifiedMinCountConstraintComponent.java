@@ -173,12 +173,13 @@ public class QualifiedMinCountConstraintComponent extends AbstractConstraintComp
 									connectionsGroup.getRdfsSubClassOfReasoner(), stableRandomVariableProvider),
 					false,
 					null,
-					(b) -> new ValidationTuple(b.getValue("a"), b.getValue("c"), scope, true)
+					(b) -> new ValidationTuple(b.getValue("a"), b.getValue("c"), scope, true,
+							validationSettings.getDataGraph())
 			);
 
 			return new TupleMapper(relevantTargetsWithPath, t -> {
 				List<Value> targetChain = t.getTargetChain(true);
-				return new ValidationTuple(targetChain, Scope.propertyShape, false);
+				return new ValidationTuple(targetChain, Scope.propertyShape, false, validationSettings.getDataGraph());
 			});
 
 		};
@@ -218,7 +219,8 @@ public class QualifiedMinCountConstraintComponent extends AbstractConstraintComp
 									connectionsGroup.getRdfsSubClassOfReasoner(), stableRandomVariableProvider),
 					false,
 					null,
-					(b) -> new ValidationTuple(b.getValue("a"), b.getValue("c"), scope, true)
+					(b) -> new ValidationTuple(b.getValue("a"), b.getValue("c"), scope, true,
+							validationSettings.getDataGraph())
 			);
 		}
 

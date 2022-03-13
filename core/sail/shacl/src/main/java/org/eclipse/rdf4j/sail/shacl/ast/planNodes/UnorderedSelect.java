@@ -37,7 +37,7 @@ public class UnorderedSelect implements PlanNode {
 	private final Resource subject;
 	private final IRI predicate;
 	private final Value object;
-	private Resource[] dataGraph;
+	private final Resource[] dataGraph;
 	private final Function<Statement, ValidationTuple> mapper;
 
 	private boolean printed = false;
@@ -193,7 +193,7 @@ public class UnorderedSelect implements PlanNode {
 
 			@Override
 			public ValidationTuple apply(Statement s) {
-				return new ValidationTuple(s.getSubject(), scope, false);
+				return new ValidationTuple(s.getSubject(), scope, false, s.getContext());
 			}
 
 			@Override
@@ -237,7 +237,7 @@ public class UnorderedSelect implements PlanNode {
 
 			@Override
 			public ValidationTuple apply(Statement s) {
-				return new ValidationTuple(s.getObject(), scope, false);
+				return new ValidationTuple(s.getObject(), scope, false, s.getContext());
 			}
 
 			@Override
@@ -276,7 +276,7 @@ public class UnorderedSelect implements PlanNode {
 			@Override
 			public ValidationTuple apply(Statement s) {
 				return new ValidationTuple(s.getSubject(), s.getObject(), ConstraintComponent.Scope.propertyShape,
-						true);
+						true, s.getContext());
 			}
 
 			@Override

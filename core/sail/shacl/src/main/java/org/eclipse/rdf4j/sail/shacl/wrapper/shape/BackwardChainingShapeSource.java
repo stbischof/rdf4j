@@ -40,6 +40,11 @@ public class BackwardChainingShapeSource implements ShapeSource {
 		return new BackwardChainingShapeSource(connection, context);
 	}
 
+	@Override
+	public Resource[] getActiveContexts() {
+		return context;
+	}
+
 	public Stream<ShapesGraph> getAllShapeContexts() {
 		assert context != null;
 		try (Stream<? extends Statement> stream = connection

@@ -71,6 +71,11 @@ public class CombinedShapeSource implements ShapeSource {
 
 	}
 
+	@Override
+	public Resource[] getActiveContexts() {
+		return context;
+	}
+
 	public Stream<ShapesGraph> getAllShapeContexts() {
 		return Stream.concat(rdf4jShapesGraph.getAllShapeContexts(), baseSail.getAllShapeContexts());
 	}

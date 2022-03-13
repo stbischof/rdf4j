@@ -46,7 +46,8 @@ public class TargetClass extends Target {
 	}
 
 	@Override
-	public PlanNode getAdded(ConnectionsGroup connectionsGroup, Resource[] dataGraph, ConstraintComponent.Scope scope) {
+	public PlanNode getAdded(ConnectionsGroup connectionsGroup, Resource[] dataGraph,
+			ConstraintComponent.Scope scope) {
 		return getAddedRemovedInner(connectionsGroup.getAddedStatements(), dataGraph, scope);
 	}
 
@@ -60,7 +61,7 @@ public class TargetClass extends Target {
 		} else {
 			planNode = new Select(connection,
 					getQueryFragment("?a", "?c", null, new StatementMatcher.StableRandomVariableProvider()),
-					"?a", b -> new ValidationTuple(b.getValue("a"), scope, false), dataGraph);
+					"?a", b -> new ValidationTuple(b.getValue("a"), scope, false, dataGraph), dataGraph);
 		}
 
 		return Unique.getInstance(planNode, false);
@@ -98,7 +99,8 @@ public class TargetClass extends Target {
 	}
 
 	@Override
-	public PlanNode getTargetFilter(ConnectionsGroup connectionsGroup, Resource[] dataGraph, PlanNode parent) {
+	public PlanNode getTargetFilter(ConnectionsGroup connectionsGroup, Resource[] dataGraph,
+			PlanNode parent) {
 		return new ExternalPredicateObjectFilter(connectionsGroup.getBaseConnection(), dataGraph, RDF.TYPE, targetClass,
 				parent,
 				true, ExternalPredicateObjectFilter.FilterOn.activeTarget);

@@ -23,6 +23,8 @@ public interface ShapeSource extends AutoCloseable {
 
 	ShapeSource withContext(Resource[] context);
 
+	Resource[] getActiveContexts();
+
 	Stream<ShapesGraph> getAllShapeContexts();
 
 	Stream<Resource> getTargetableShape();
@@ -43,13 +45,10 @@ public interface ShapeSource extends AutoCloseable {
 	void close();
 
 	class ShapesGraph {
+		private final static Resource[] allContext = {};
+
 		private final Resource[] dataGraph;
 		private final Resource[] shapesGraph;
-
-		public ShapesGraph(Resource dataGraph, IRI shapesGraph) {
-			this.dataGraph = new Resource[] { handleDefaultGraph(dataGraph) };
-			this.shapesGraph = new Resource[] { handleDefaultGraph(shapesGraph) };
-		}
 
 		public ShapesGraph(Resource dataGraph, List<? extends Statement> shapesGraph) {
 			this.dataGraph = new Resource[] { handleDefaultGraph(dataGraph) };
@@ -59,6 +58,11 @@ public interface ShapeSource extends AutoCloseable {
 					.map(o -> ((Resource) o))
 					.map(ShapesGraph::handleDefaultGraph)
 					.toArray(Resource[]::new);
+		}
+
+		public ShapesGraph(IRI shapesGraph) {
+			this.dataGraph = allContext;
+			this.shapesGraph = new Resource[] { handleDefaultGraph(shapesGraph) };
 		}
 
 		private static Resource handleDefaultGraph(Resource graph) {

@@ -21,6 +21,7 @@ import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.query.Binding;
 import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.Dataset;
 import org.eclipse.rdf4j.query.MalformedQueryException;
 import org.eclipse.rdf4j.query.QueryEvaluationException;
 import org.eclipse.rdf4j.query.QueryLanguage;
@@ -34,6 +35,7 @@ import org.eclipse.rdf4j.sail.shacl.ast.StatementMatcher;
 import org.eclipse.rdf4j.sail.shacl.ast.constraintcomponents.ConstraintComponent;
 import org.eclipse.rdf4j.sail.shacl.ast.planNodes.LoggingCloseableIteration;
 import org.eclipse.rdf4j.sail.shacl.ast.planNodes.PlanNode;
+import org.eclipse.rdf4j.sail.shacl.ast.planNodes.PlanNodeHelper;
 import org.eclipse.rdf4j.sail.shacl.ast.planNodes.ValidationExecutionLogger;
 import org.eclipse.rdf4j.sail.shacl.ast.planNodes.ValidationTuple;
 import org.eclipse.rdf4j.sail.shacl.wrapper.data.ConnectionsGroup;
@@ -54,6 +56,8 @@ public class TargetChainRetriever implements PlanNode {
 	private final String query;
 	private final QueryParserFactory queryParserFactory;
 	private final ConstraintComponent.Scope scope;
+	private final Resource[] dataGraph;
+	private final Dataset dataset;
 	private StackTraceElement[] stackTrace;
 	private ValidationExecutionLogger validationExecutionLogger;
 
@@ -62,6 +66,8 @@ public class TargetChainRetriever implements PlanNode {
 			List<StatementMatcher> removedStatementMatchers, String query,
 			List<StatementMatcher.Variable> vars, ConstraintComponent.Scope scope) {
 		this.connectionsGroup = connectionsGroup;
+		this.dataGraph = dataGraph;
+		this.dataset = PlanNodeHelper.asDefaultGraphDataset(this.dataGraph);
 		this.statementMatchers = StatementMatcher.reduce(statementMatchers);
 
 		this.scope = scope;
@@ -143,7 +149,8 @@ public class TargetChainRetriever implements PlanNode {
 					statements = connection.getStatements(
 							currentStatementMatcher.getSubjectValue(),
 							currentStatementMatcher.getPredicateValue(),
-							currentStatementMatcher.getObjectValue(), false);
+							currentStatementMatcher.getObjectValue(), false, dataGraph);
+
 				} while (!statements.hasNext());
 
 				previousBindings = null;
@@ -202,7 +209,7 @@ public class TargetChainRetriever implements PlanNode {
 						// TODO: Should really bulk this operation!
 
 						results = connectionsGroup.getBaseConnection()
-								.evaluate(parsedQuery.getTupleExpr(), parsedQuery.getDataset(),
+								.evaluate(parsedQuery.getTupleExpr(), dataset,
 										bindings, true);
 
 					} catch (MalformedQueryException e) {
@@ -216,16 +223,17 @@ public class TargetChainRetriever implements PlanNode {
 
 					if (nextBinding.size() == 1) {
 						Iterator<Binding> iterator = nextBinding.iterator();
-						if (iterator.hasNext())
-							next = new ValidationTuple(iterator.next().getValue(), scope, false);
-						else
-							next = new ValidationTuple((Value) null, scope, false);
+						if (iterator.hasNext()) {
+							next = new ValidationTuple(iterator.next().getValue(), scope, false, dataGraph);
+						} else {
+							next = new ValidationTuple((Value) null, scope, false, dataGraph);
+						}
 					} else {
 						Value[] values = StreamSupport.stream(nextBinding.spliterator(), false)
 								.sorted(Comparator.comparing(Binding::getName))
 								.map(Binding::getValue)
 								.toArray(Value[]::new);
-						next = new ValidationTuple(values, scope, false);
+						next = new ValidationTuple(values, scope, false, dataGraph);
 
 					}
 
@@ -310,7 +318,7 @@ public class TargetChainRetriever implements PlanNode {
 
 	@Override
 	public String getId() {
-		return null;
+		return System.identityHashCode(this) + "";
 	}
 
 	@Override
@@ -340,12 +348,13 @@ public class TargetChainRetriever implements PlanNode {
 		return statementMatchers.equals(that.statementMatchers) &&
 				removedStatementMatchers.equals(that.removedStatementMatchers) &&
 				query.equals(that.query) &&
+				Objects.equals(dataset, that.dataset) &&
 				scope == that.scope;
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(statementMatchers, removedStatementMatchers, query, scope);
+		return Objects.hash(statementMatchers, removedStatementMatchers, query, scope, dataset);
 	}
 
 	@Override

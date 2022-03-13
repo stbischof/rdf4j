@@ -32,7 +32,7 @@ public class ExternalFilterByPredicate implements PlanNode {
 	private final On on;
 	private boolean printed = false;
 	private ValidationExecutionLogger validationExecutionLogger;
-	private Resource[] dataGraph;
+	private final Resource[] dataGraph;
 
 	public enum On {
 		Subject,
@@ -79,14 +79,16 @@ public class ExternalFilterByPredicate implements PlanNode {
 
 					return filterOnPredicates.stream()
 							.filter(predicate -> connection.hasStatement((Resource) node, predicate, null, true,
-									dataGraph))
+									dataGraph)
+							)
 							.findFirst()
 							.orElse(null);
 
 				} else if (on == On.Object) {
 
 					return filterOnPredicates.stream()
-							.filter(predicate -> connection.hasStatement(null, predicate, node, true, dataGraph))
+							.filter(predicate -> connection.hasStatement(null, predicate, node, true, dataGraph)
+							)
 							.findFirst()
 							.orElse(null);
 

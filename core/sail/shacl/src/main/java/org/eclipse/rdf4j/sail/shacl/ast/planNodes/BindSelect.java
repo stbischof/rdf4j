@@ -20,17 +20,15 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.text.StringEscapeUtils;
 import org.eclipse.rdf4j.common.iteration.CloseableIteration;
-import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Resource;
-import org.eclipse.rdf4j.model.vocabulary.RDF4J;
 import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.Dataset;
 import org.eclipse.rdf4j.query.MalformedQueryException;
 import org.eclipse.rdf4j.query.QueryEvaluationException;
 import org.eclipse.rdf4j.query.QueryLanguage;
 import org.eclipse.rdf4j.query.algebra.BindingSetAssignment;
 import org.eclipse.rdf4j.query.algebra.helpers.AbstractQueryModelVisitor;
 import org.eclipse.rdf4j.query.impl.EmptyBindingSet;
-import org.eclipse.rdf4j.query.impl.SimpleDataset;
 import org.eclipse.rdf4j.query.parser.ParsedQuery;
 import org.eclipse.rdf4j.query.parser.QueryParserFactory;
 import org.eclipse.rdf4j.query.parser.QueryParserRegistry;
@@ -55,7 +53,7 @@ public class BindSelect implements PlanNode {
 	private static final Logger logger = LoggerFactory.getLogger(BindSelect.class);
 
 	private final SailConnection connection;
-	private final SimpleDataset dataset;
+	private final Dataset dataset;
 	private final Function<BindingSet, ValidationTuple> mapper;
 
 	private final String query;
@@ -75,7 +73,8 @@ public class BindSelect implements PlanNode {
 			List<String> varNames, ConstraintComponent.Scope scope, int bulkSize, EffectiveTarget.Extend direction,
 			boolean includePropertyShapeValues) {
 		this.connection = connection;
-		this.mapper = (bindingSet) -> new ValidationTuple(bindingSet, varNames, scope, includePropertyShapeValues);
+		this.mapper = (bindingSet) -> new ValidationTuple(bindingSet, varNames, scope, includePropertyShapeValues,
+				dataGraph);
 		this.varNames = varNames;
 		this.scope = scope;
 		this.vars = vars;
@@ -91,13 +90,7 @@ public class BindSelect implements PlanNode {
 		this.direction = direction;
 		this.includePropertyShapeValues = includePropertyShapeValues;
 
-		dataset = new SimpleDataset();
-		for (Resource resource : dataGraph) {
-			if (resource == null)
-				dataset.addDefaultGraph(RDF4J.NIL);
-			else
-				dataset.addDefaultGraph(((IRI) resource));
-		}
+		dataset = PlanNodeHelper.asDefaultGraphDataset(dataGraph);
 
 		// this.stackTrace = Thread.currentThread().getStackTrace();
 
@@ -370,7 +363,7 @@ public class BindSelect implements PlanNode {
 					query.equals(that.query) &&
 					vars.equals(that.vars) &&
 					source.equals(that.source) &&
-					dataset.equals(that.dataset) &&
+					Objects.equals(dataset, that.dataset) &&
 					direction == that.direction;
 		} else {
 			return bulkSize == that.bulkSize &&
@@ -381,7 +374,7 @@ public class BindSelect implements PlanNode {
 					query.equals(that.query) &&
 					vars.equals(that.vars) &&
 					source.equals(that.source) &&
-					dataset.equals(that.dataset) &&
+					Objects.equals(dataset, that.dataset) &&
 					direction == that.direction;
 		}
 

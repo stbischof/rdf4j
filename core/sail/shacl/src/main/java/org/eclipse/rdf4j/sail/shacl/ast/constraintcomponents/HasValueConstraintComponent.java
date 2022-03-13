@@ -109,7 +109,8 @@ public class HasValueConstraintComponent extends AbstractConstraintComponent {
 							connectionsGroup.getRdfsSubClassOfReasoner(), stableRandomVariableProvider),
 					false,
 					null,
-					(b) -> new ValidationTuple(b.getValue("a"), b.getValue("c"), scope, true)
+					(b) -> new ValidationTuple(b.getValue("a"), b.getValue("c"), scope, true,
+							validationSettings.getDataGraph())
 			);
 
 			PlanNode invalidTargets = new GroupByFilter(joined, group -> {

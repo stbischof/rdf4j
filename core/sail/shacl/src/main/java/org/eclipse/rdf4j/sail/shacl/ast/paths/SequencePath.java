@@ -58,7 +58,8 @@ public class SequencePath extends Path {
 	}
 
 	@Override
-	public PlanNode getAdded(ConnectionsGroup connectionsGroup, Resource[] dataGraph, PlanNodeWrapper planNodeWrapper) {
+	public PlanNode getAdded(ConnectionsGroup connectionsGroup, Resource[] dataGraph,
+			PlanNodeWrapper planNodeWrapper) {
 		throw new ShaclUnsupportedException();
 	}
 

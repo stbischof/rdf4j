@@ -513,10 +513,11 @@ abstract public class AbstractShaclTest {
 			if (!Models.isomorphic(validationReportActual, validationReportExpected)) {
 //				writeActualModelToExpectedModelForDevPurposes(dataPath, validationReportActual);
 
-				String validationReportExpectedString = modelToString(validationReportExpected);
-				String validationReportActualString = modelToString(validationReportActual);
+				String validationReportExpectedString = modelToString(validationReportExpected, RDFFormat.TURTLE);
+				String validationReportActualString = modelToString(validationReportActual, RDFFormat.TURTLE);
 				assertEquals(validationReportExpectedString, validationReportActualString);
 			}
+
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -530,7 +531,7 @@ abstract public class AbstractShaclTest {
 				.replace("/target/test-classes/", "/src/test/resources/");
 		File file1 = new File(file + "report.ttl");
 		try (FileOutputStream fileOutputStream = new FileOutputStream(file1)) {
-			IOUtils.write(modelToString(report), fileOutputStream, StandardCharsets.UTF_8);
+			IOUtils.write(modelToString(report, RDFFormat.TURTLE), fileOutputStream, StandardCharsets.UTF_8);
 		}
 
 	}
@@ -587,6 +588,15 @@ abstract public class AbstractShaclTest {
 
 		// sh:shapesGraph
 		if (testCase.testCasePath.startsWith("test-cases/datatype/simpleNamedGraph/")) {
+			return;
+		}
+
+		// uses multiple named graphs
+		if (testCase.testCasePath.startsWith("test-cases/minCount/simple/valid/case6")) {
+			return;
+		}
+
+		if (testCase.testCasePath.startsWith("test-cases/minCount/simple/invalid/case4")) {
 			return;
 		}
 
@@ -658,14 +668,18 @@ abstract public class AbstractShaclTest {
 
 					for (Model validationReport : Arrays.asList(validationReportActual, validationReportExpected)) {
 						validationReport.remove(null, RDF4J.TRUNCATED, null);
+						validationReport.remove(null, RSX.dataGraph, null);
+						validationReport.remove(null, RSX.shapesGraph, null);
+						validationReport.remove(null, RDF4J.TRUNCATED, null);
 						// we don't yet support sh:resultMessage
 						validationReport.remove(null, SHACL.RESULT_MESSAGE, null);
 					}
 
 					if (!Models.isomorphic(validationReportActual, validationReportExpected)) {
 
-						String validationReportExpectedString = modelToString(validationReportExpected);
-						String validationReportActualString = modelToString(validationReportActual);
+						String validationReportExpectedString = modelToString(validationReportExpected,
+								RDFFormat.TURTLE);
+						String validationReportActualString = modelToString(validationReportActual, RDFFormat.TURTLE);
 						assertEquals(validationReportExpectedString, validationReportActualString);
 					}
 				} catch (IOException e) {
@@ -730,7 +744,7 @@ abstract public class AbstractShaclTest {
 				try (Stream<Statement> stream = connection.getStatements(null, null, null, false).stream()) {
 					LinkedHashModel model = stream.collect(Collectors.toCollection(LinkedHashModel::new));
 
-					String prettyPrintedModel = modelToString(model);
+					String prettyPrintedModel = modelToString(model, RDFFormat.TRIG);
 
 					System.out.println("########### CURRENT REPOSITORY STATE ###########");
 					System.out.println(prettyPrintedModel);
@@ -742,7 +756,7 @@ abstract public class AbstractShaclTest {
 		}
 	}
 
-	static String modelToString(Model model) {
+	static String modelToString(Model model, RDFFormat format) {
 
 		ArrayList<Statement> statements = new ArrayList<>(model);
 		ValueComparator valueComparator = new ValueComparator();
@@ -756,14 +770,15 @@ abstract public class AbstractShaclTest {
 		model = new LinkedHashModel(statements);
 
 		model.setNamespace("ex", "http://example.com/ns#");
-		model.setNamespace(FOAF.PREFIX, FOAF.NAMESPACE);
-		model.setNamespace(XSD.PREFIX, XSD.NAMESPACE);
-		model.setNamespace(RDF.PREFIX, RDF.NAMESPACE);
-		model.setNamespace(RDFS.PREFIX, RDFS.NAMESPACE);
+		model.setNamespace(FOAF.NS);
+		model.setNamespace(XSD.NS);
+		model.setNamespace(RDF.NS);
+		model.setNamespace(RDFS.NS);
 		model.setNamespace(SHACL.NS);
 		model.setNamespace(RDF.NS);
 		model.setNamespace(RDFS.NS);
 		model.setNamespace(RSX.NS);
+		model.setNamespace(RDF4J.NS);
 
 		WriterConfig writerConfig = new WriterConfig();
 		writerConfig.set(BasicWriterSettings.PRETTY_PRINT, true);
@@ -772,7 +787,7 @@ abstract public class AbstractShaclTest {
 
 		StringWriter stringWriter = new StringWriter();
 
-		Rio.write(model, stringWriter, RDFFormat.TRIG, writerConfig);
+		Rio.write(model, stringWriter, format, writerConfig);
 
 		return stringWriter.toString();
 	}
@@ -1029,11 +1044,11 @@ abstract public class AbstractShaclTest {
 			shapesModel.remove(null, RDF.TYPE, SHACL.SHAPE);
 			shapesModel.remove(null, RDF.TYPE, SHACL.PROPERTY_SHAPE);
 
-			Model expected = parse;// Models.stripContexts(parse, RDF4J.SHACL_SHAPE_GRAPH);
-			Model actual = shapesModel; // Models.stripContexts(shapesModel, RDF4J.SHACL_SHAPE_GRAPH);
+			Model expected = parse;
+			Model actual = shapesModel;
 
 			if (!Models.isomorphic(expected, actual)) {
-				assertEquals(modelToString(expected), modelToString(actual));
+				assertEquals(modelToString(expected, RDFFormat.TRIG), modelToString(actual, RDFFormat.TRIG));
 			}
 
 		} catch (InterruptedException e) {

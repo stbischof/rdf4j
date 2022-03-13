@@ -36,7 +36,8 @@ public class SimplePath extends Path {
 	}
 
 	@Override
-	public PlanNode getAdded(ConnectionsGroup connectionsGroup, Resource[] dataGraph, PlanNodeWrapper planNodeWrapper) {
+	public PlanNode getAdded(ConnectionsGroup connectionsGroup, Resource[] dataGraph,
+			PlanNodeWrapper planNodeWrapper) {
 		PlanNode unorderedSelect = new UnorderedSelect(connectionsGroup.getAddedStatements(), null, predicate, null,
 				dataGraph, UnorderedSelect.Mapper.SubjectObjectPropertyShapeMapper.getFunction());
 

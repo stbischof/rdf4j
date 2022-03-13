@@ -45,11 +45,11 @@ public abstract class AbstractBulkJoinPlanNode implements PlanNode {
 	}
 
 	void runQuery(ArrayDeque<ValidationTuple> left, ArrayDeque<ValidationTuple> right, SailConnection connection,
-			ParsedQuery parsedQuery, Dataset dataset, boolean skipBasedOnPreviousConnection,
+			ParsedQuery parsedQuery, Dataset dataset, Resource[] dataGraph, boolean skipBasedOnPreviousConnection,
 			SailConnection previousStateConnection,
 			Function<BindingSet, ValidationTuple> mapper) {
 		List<BindingSet> newBindindingset = buildBindingSets(left, connection, skipBasedOnPreviousConnection,
-				previousStateConnection);
+				previousStateConnection, dataGraph);
 
 		if (!newBindindingset.isEmpty()) {
 			updateQuery(parsedQuery, newBindindingset);
@@ -92,7 +92,7 @@ public abstract class AbstractBulkJoinPlanNode implements PlanNode {
 	}
 
 	private List<BindingSet> buildBindingSets(ArrayDeque<ValidationTuple> left, SailConnection connection,
-			boolean skipBasedOnPreviousConnection, SailConnection previousStateConnection) {
+			boolean skipBasedOnPreviousConnection, SailConnection previousStateConnection, Resource[] dataGraph) {
 		return left.stream()
 
 				.filter(tuple -> {
@@ -103,11 +103,15 @@ public abstract class AbstractBulkJoinPlanNode implements PlanNode {
 					boolean hasStatement;
 
 					if (!(tuple.getActiveTarget().isResource())) {
-						hasStatement = previousStateConnection.hasStatement(null, null, tuple.getActiveTarget(), true);
+						hasStatement = previousStateConnection.hasStatement(null, null, tuple.getActiveTarget(),
+								true, dataGraph);
+
 					} else {
-						hasStatement = previousStateConnection
-								.hasStatement(((Resource) tuple.getActiveTarget()), null, null, true) ||
-								previousStateConnection.hasStatement(null, null, tuple.getActiveTarget(), true);
+						hasStatement = previousStateConnection.hasStatement(((Resource) tuple.getActiveTarget()),
+								null, null, true, dataGraph) ||
+								previousStateConnection.hasStatement(null, null, tuple.getActiveTarget(), true,
+										dataGraph);
+
 					}
 
 					if (!hasStatement && validationExecutionLogger.isEnabled()) {

@@ -47,13 +47,12 @@ public class InversePath extends Path {
 	}
 
 	@Override
-	public PlanNode getAdded(ConnectionsGroup connectionsGroup, Resource[] dataGraph, PlanNodeWrapper planNodeWrapper) {
+	public PlanNode getAdded(ConnectionsGroup connectionsGroup, Resource[] dataGraph,
+			PlanNodeWrapper planNodeWrapper) {
 
 		PlanNode added = inversePath.getAdded(connectionsGroup, dataGraph, null);
-		added = new TupleMapper(added, t -> {
-			return new ValidationTuple(t.getValue(), t.getActiveTarget(), ConstraintComponent.Scope.propertyShape,
-					true);
-		});
+		added = new TupleMapper(added, t -> new ValidationTuple(t.getValue(), t.getActiveTarget(),
+				ConstraintComponent.Scope.propertyShape, true, dataGraph));
 
 		if (planNodeWrapper != null) {
 			added = planNodeWrapper.apply(added);
